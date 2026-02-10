@@ -43,13 +43,7 @@ jobs:
             test "$ref" = "$EXPECTED_REF"
           fi
 
-          payload=$(cat <<JSON
-          {
-            "source": "github-actions",
-            "run_id": "${GITHUB_RUN_ID}"
-          }
-JSON
-          )
+          payload=$(printf '{"source":"github-actions","run_id":"%s"}' "${GITHUB_RUN_ID}")
 
           status=$(curl -sS -o resp.txt -w "%{http_code}" \
             -X POST "${SUPABASE_URL}/rest/v1/health_check" \
