@@ -10,11 +10,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Call Supabase API
+      - name: Call Supabase API (debug)
         run: |
-          curl -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/health_check" \
+          set -euo pipefail
+          echo "URL: ${{ secrets.SUPABASE_URL }}/rest/v1/health_check"
+          status=$(curl -sS -o resp.txt -w "%{http_code}" \
+            -X POST "${{ secrets.SUPABASE_URL }}/rest/v1/health_check" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Content-Type: application/json" \
+            -H "Prefer: return=representation" \
             -d '{}'
+          )
+          echo "HTTP Status: $status"
+          echo "Response:"
+          cat resp.txt
+          # 让非 2xx 直接让 job 失败，避免“假成功”
+          test "$status" -ge 200 -a "$status" -lt 300
+
 
